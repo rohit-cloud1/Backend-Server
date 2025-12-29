@@ -1,26 +1,27 @@
-import express from 'express';
-import cors from 'cors';
+import express from "express";
+import cors from "cors";
 
-import routeCollection from './routes/route.js';
-import connectToDatabase from './connectionDB/connectionToDB.js';
-import deserializerUser from './middlewair/deserializerUser.js';
+import dotenv from "dotenv";
+dotenv.config();
 
+
+import routeCollection from "./routes/route.js";
+import connectToDatabase from "./connectionDB/connectionToDB.js";
+import deserializerUser from "./middlewair/deserializerUser.js";
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-
-app.use(cors({
-    origin: '*',
-}));
-
+// middlewares
+app.use(cors({ origin: "*" }));
+app.use(express.json());
 app.use(deserializerUser);
 
-app.use(express.json());
+// routes
+routeCollection(app);
 
-
-app.listen(2000, (req, res) => {
-    connectToDatabase()
-    routeCollection(app)
-    console.log('server is running on port 2000');
-})
+// start server ONLY
+app.listen(PORT, async () => {
+  await connectToDatabase();
+  console.log(`🚀 Server running on port ${PORT}`);
+});

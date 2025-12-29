@@ -19,7 +19,7 @@ const loginFuncController = async (req, res) => {
             "_id": user._id,
             "email": user.email,
 
-        }, `rohit_private_key`);
+        }, process.env.JWT_SECRET);
         try {
             await sendEmailService(user.email, "Login Successfully",`Hello ${user.name} , you have successfully logged in`)
         } catch (error) {
