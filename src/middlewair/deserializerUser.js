@@ -1,27 +1,27 @@
-import lodash from 'lodash';
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
-const { get } = lodash;
-
-const deserializerUser = async (req, res, next) => {
+const deserializerUser = (req, res, next) => {
   try {
-    const authHeader = get(req, 'headers.authorization', '');
+    const authHeader = req.headers.authorization;
 
-    if (authHeader) {
-      const token = authHeader.replace(/^Bearer\s+/i, '');
-      
-      // Note: Use jwt.verify() if you need to validate the token
-      const user = jwt.decode(token); 
-      
-      if (user) {
-        req.user = user;
-      }
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        success: false,
+        message: "Token missing",
+      });
     }
 
-    next(); // Always call next, even if no user found
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = decoded;
+    next();
   } catch (error) {
-    console.error('Error in deserializerUser:', error);
-    res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
   }
 };
 
